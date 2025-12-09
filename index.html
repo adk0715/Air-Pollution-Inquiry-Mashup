@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="dust.css">
+
+    <title>실시간 대기오염정보 조회 서비스</title> 
+
+    <style>
+        /* 페이지 전체 폰트 등 기본 스타일 */
+        body {
+            background-color: #f5f7fa; /* 배경을 아주 연한 회색으로 하여 흰색 박스들을 돋보이게 함 */
+        }
+
+        /* 메인 타이틀 스타일 */
+        .main-header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        /* 우측 컨트롤 바 (검색 영역) 스타일 */
+        .control-panel {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            display: flex; /* 내부 요소 가로 정렬 */
+            align-items: center;
+            justify-content: space-between; /* 양쪽 끝으로 배치 */
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* 테이블 제목 스타일 */
+        .table-title {
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            margin-bottom: 0;
+            border: 1px solid #dee2e6;
+            border-bottom: none; /* 테이블과 이어지는 느낌 */
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #495057;
+        }
+
+        /* 테이블 스타일 보정 */
+        .custom-table th {
+            width: 30%;
+            background-color: #f8f9fa;
+            vertical-align: middle;
+        }
+        .custom-table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h3 class="mb-4">2023810034 안도경</h3>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="main-header">
+                    <h2>실시간 대기오염정보 조회 서비스</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col-lg-7 mb-3">
+                <div id="map" style="height: 600px; width: 100%; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"></div>
+            </div>
+
+            <div class="col-lg-5">
+                
+                <div class="control-panel">
+                    <div class="d-flex align-items-center">
+                        <select name="location" class="form-select form-select-sm me-2" style="width: auto;" onChange="selectLoc(this.value);">
+                            <option value="">지역선택</option>
+                            <option value="서울특별시">서울</option>
+                            <option value="부산광역시">부산</option>
+                            <option value="대구광역시">대구</option>
+                            <option value="인천광역시">인천</option>
+                            <option value="광주광역시">광주</option>
+                            <option value="대전광역시">대전</option>
+                            <option value="울산광역시">울산</option>
+                            <option value="경기도">경기도</option>
+                            <option value="강원도">강원도</option>
+                            <option value="충청북도">충청북도</option>
+                            <option value="충청남도">충청남도</option>
+                            <option value="전라북도">전라북도</option>
+                            <option value="전라남도">전라남도</option> 
+                            <option value="경상북도">경상북도</option>
+                            <option value="경상남도">경상남도</option>
+                            <option value="제주특별자치도">제주</option>
+                        </select>       
+                        <button id="myloc" class="btn btn-outline-dark btn-sm" onclick="moveTomyLocation();">내위치</button> 
+                    </div>
+                    <span id="myloctext" class="text-muted small">현재위치</span>
+                </div>
+
+                <div class="mb-4">
+                    <div class="table-title">실시간 대기오염정보 조회</div>
+                    <table class="table table-bordered custom-table mb-0 bg-white">
+                        <tr>
+                            <th>측정날짜</th>
+                            <td id="d_1" class="table-primary">로딩중</td> </tr>
+                        <tr>
+                            <th>측정소</th>
+                            <td id="d_2" class="table-success">로딩중</td>
+                        </tr>
+                        <tr>
+                            <th>통합지수</th>
+                            <td id="d_3" class="table-danger">로딩중</td>
+                        </tr>
+                        <tr>
+                            <th>미세먼지</th>
+                            <td id="d_4" class="table-info">로딩중</td>
+                        </tr>
+                        <tr>
+                            <th>오존</th>
+                            <td id="d_5" class="table-warning">로딩중</td>
+                        </tr>
+                        <tr>
+                            <th>일산화 탄소</th>
+                            <td id="d_6" class="table-secondary">로딩중</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div>
+                    <div class="table-title">미세먼지(PM10) 예보통보 조회</div>
+                    <table class="table table-bordered custom-table mb-0 bg-white">
+                        <tr>
+                            <th>통보시간</th>
+                            <td id="f_1">로딩중</td>
+                        </tr>
+                        <tr>
+                            <th>예보등급</th>
+                            <td id="f_2">로딩중</td>
+                        </tr>
+                        <tr>
+                            <th style="height: 100px;">발생원인</th> <td id="f_3" style="vertical-align: top;">로딩중</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div> </div> </div>
+
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=9560c120eb7ad6127a533a289ff8d8e3&libraries=services"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="dust_template.js"></script>
+</body>
+</html>
